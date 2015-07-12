@@ -63,6 +63,29 @@ frisby.create('GET user johndoe')
 
 Any of the [Jasmine matchers](https://github.com/pivotal/jasmine/wiki/Matchers) can be used inside the `after` and `afterJSON` callbacks to perform additional or custom tests on the response data.
 
+If you are testing the completion of a serverside process, and need to repeat a request until some condition is met, use `pollUntil` or `pollUntilJSON` before the http verb call (`get`, `post`, `put`, `delete`, or `head`). `pollUntil` and `pollUntilJSON` take the same arguments as `after` and `afterJSON`.
+
+```javascript
+
+var frisby = require('../lib/frisby');
+
+frisby.create("Zip all user photos for download")
+  .post("http://fake.domain/user/1/photos/zip")
+  .afterJSON(function(json){
+    frisby.create("Download zip when it is ready")
+      .pollUntilJSON(function(json){
+        return json.jobstatus !== "pending";
+      })
+      .get("http://fake.domain/zip/"+json.zip_id)
+      .expectJSON(function(json){
+        expect(json.zip.filecount).toBe(4);
+      })
+    .toss();
+  })
+.toss();
+
+
+```
 ## Running Tests
 
 Frisby is built on top of the jasmine BDD spec framework, and uses the excellent [jasmine-node test runner](https://github.com/mhevery/jasmine-node) to run spec tests in a specified target directory.  

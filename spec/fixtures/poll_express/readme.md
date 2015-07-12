@@ -1,0 +1,1 @@
+This directory exists so we can run a service that will mock out a long-running process for pollUntil to test.
